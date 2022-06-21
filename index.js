@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
   res.send('Express + TypeScript Server');
 });
 
-// require("./app/routes/tutorial_routes")(app);
+require("./app/routes/tutorial.routes")(app);
 
 app.listen(config.get('/port'), () => {
   console.log(`[${config.get('/serviceName')}]: Server is running at https://localhost:${config.get('/port')}`);
