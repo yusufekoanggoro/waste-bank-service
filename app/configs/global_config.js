@@ -17,6 +17,8 @@ const config = {
       idle: 10000
     }
   },
+  publicKey: process.env.PUBLIC_KEY_PATH,
+  privateKey: process.env.PRIVATE_KEY_PATH,
 }
 
 const store = new confidence.Store(config);
