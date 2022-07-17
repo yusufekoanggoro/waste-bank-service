@@ -25,6 +25,7 @@ require("./app/routes/tutorial.routes")(app);
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/waste.routes")(app);
+require("./app/routes/transaction.routes")(app);
 
 app.listen(config.get('/port'), () => {
   console.log(`[${config.get('/serviceName')}]: Server is running at https://localhost:${config.get('/port')}`);

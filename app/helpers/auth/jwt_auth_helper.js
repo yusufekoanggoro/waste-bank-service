@@ -15,7 +15,7 @@ const generateToken = async (data) => {
     algorithm: 'RS256',
     audience: '97b331dh93-4hil3ff-4e83358-9848124-b3aAsd9b9f72c34',
     issuer: 'sanstock',
-    expiresIn: '7d'
+    expiresIn: '10y'
   };
   const token = jwt.sign(data, privateKey, verifyOptions);
   return token;

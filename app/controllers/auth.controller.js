@@ -34,7 +34,7 @@ exports.authenticate = async (req, res) => {
                 username: result.username,
                 sub: result.username
             };
-            const accessToken = await jwtAuth.generateToken(dataResponse, '7d');
+            const accessToken = await jwtAuth.generateToken(dataResponse);
             dataResponse.accessToken = accessToken;
             return wrapper.response(res, 'success', dataResponse, 'Sign In Success', SUCCESS.OK)
         }else{
