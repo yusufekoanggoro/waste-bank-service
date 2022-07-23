@@ -1,6 +1,7 @@
 const express = require('express');
 const config = require('./app/configs/global_config');
 const db = require("./app/models");
+const path = require('path');
 
 const app = express();
 
@@ -17,6 +18,7 @@ db.sequelize.sync()
     console.log("Failed to sync db: " + err.message);
   });
 
+app.use(express.static(path.resolve('./public/uploads')));
 app.get('/', (req, res) => {
   res.send('Express + TypeScript Server');
 });
