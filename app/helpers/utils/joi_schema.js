@@ -36,11 +36,17 @@ const wasteFindAll = joi.object({
 
 const transactionCreate = joi.object({
   transactionId: joi.string().required(),
-  jenisSampah: joi.string().required(),
-  berat: joi.number().required(),
-  harga: joi.number().required(),
-  total: joi.number().required(),
-  jenis: joi.string().valid('in','out').required()
+  datas: joi.array().items({
+    wasteId: joi.number().required(),
+    jenisSampah: joi.string().required(),
+    satuan: joi.string().required(),
+    harga: joi.number().required(),
+    deskripsi: joi.string().required().allow(''),
+    berat: joi.number().required(),
+    total: joi.number().required(),
+  }),
+  type: joi.string().valid('in','out').required(),
+  tunai: joi.number().required(),
 });
 
 const transactionDelete = joi.object({

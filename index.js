@@ -18,7 +18,7 @@ db.sequelize.sync()
     console.log("Failed to sync db: " + err.message);
   });
 
-app.use(express.static(path.resolve('./public/uploads')));
+app.use(express.static(path.resolve('./public')));
 app.get('/', (req, res) => {
   res.send('Express + TypeScript Server');
 });

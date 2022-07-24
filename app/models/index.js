@@ -23,4 +23,16 @@ db.wastes = require("./waste.model")(sequelize, Sequelize);
 db.users = require("./user.model")(sequelize, Sequelize);
 db.transactions = require("./transactions.model")(sequelize, Sequelize);
 
+// db.wastes.belongsTo(db.transactions);
+// db.transactions.hasMany(db.wastes, {foreignKey: 'id', as: "wastes"});
+// db.transactions.belongsToMany(db.wastes, {
+//   foreignKey: 'id', // <--- one of the column of table2 - SubTask: not a primary key here in my case; can be primary key also
+//   sourceKey: 'wasteId',
+//   through: 'transactions_wastes'
+// });
+// db.wastes.belongsTo(db.transactions, {
+//   foreignKey: "transaction_id",
+//   as: "transaction",
+// });
+
 module.exports = db;

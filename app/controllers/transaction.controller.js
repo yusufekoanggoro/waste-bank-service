@@ -15,6 +15,9 @@ const serializer = require('../helpers/utils/serializer');
 const commonUtils = require('../helpers/utils/common');
 var mime = require('mime');
 var fs = require('fs');
+const pdf = require('html-pdf');
+const ejs = require('ejs');
+const Wastes = db.wastes;
 
 exports.create = async (req, res) => {
   const validatePayload = validator.isValidPayload(req.body, joiSchema.transactionCreate);
@@ -23,23 +26,42 @@ exports.create = async (req, res) => {
   }
   const requestData = validatePayload.data;
 
-  Transactions.create(requestData)
+  const transactions = requestData.datas.map( v => ({
+    transactionId: v.transactionId,
+    wasteId: v.wasteId,
+    total: v.total,
+    jenis: v.type
+  }));
+
+  Transactions.bulkCreate(transactions)
     .then(async data => {
-      let excelData = [
-        constants.HEADER_ROW,
-      ];
-      const dataArray = []
-      dataArray.push(data.get({plain:true}));
-      dataArray.map( v => {
-        excelData.push(serializer.mappingExcelRowTransaction(v))
-      })
-      const fileName = `${moment().valueOf()}.xlsx`
-      await commonUtils.makeExcelFile({rows: dataArray, fileName, transactionType: requestData.type});
-      // let binarybuffer = new Buffer(buffer, 'binary');
-      // res.attachment(`${moment().valueOf()}.xlsx`); 
-      return wrapper.response(res, 'success', {fileName}, "Success", SUCCESS.CREATED)
+      const pdfData = serializer.mappingDataForPDF(requestData);
+
+      const templateEJS = 'report.ejs';
+      const fileName = `${moment().valueOf()}.pdf`
+      await ejs.renderFile(path.join(__dirname, '../../files', templateEJS), { transaction: pdfData}, async (err, data) => {
+        if (err) {
+          res.send(err);
+        } else {
+          const options = {
+            width: '350px',
+          };
+
+          await pdf.create(data, options).toFile(`./public/reports/${fileName}`, async (err, res) => {
+              if (err) return console.log(err);
+              // console.log(res); // { filename: '/app/businesscard.pdf' }
+          });
+          // pdf.create(data, options).toStream((err, stream) => {
+          //   stream.pipe(res);
+          // });
+        }
+        
+      });
+
+      return wrapper.response(res, 'success', {fileName : `/reports/${fileName}`}, "Success", SUCCESS.CREATED)
     })
     .catch(err => {
+      console.log(err)
       return wrapper.response(res, 'fail', err, "Failed", ERROR.INTERNAL_ERROR)
     });
 };
@@ -146,29 +168,37 @@ exports.exportsData = async (req, res) => {
 
     let sortData = requestData.sort.split(':')
     Transactions.findAndCountAll({
-      where: { 
-        createdAt: {
-            [Op.gte]: requestData.startDate,
-            [Op.lt]: requestData.endDate,
-        }
-      },
+      // where: { 
+      //   createdAt: {
+      //       [Op.gte]: requestData.startDate,
+      //       [Op.lt]: requestData.endDate,
+      //   }
+      // },
       order: [
         (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
       ],
       raw: true,
+      include: [ { 
+        model: Wastes, 
+
+      //   on: {
+      //     col1: sequelize.where(sequelize.col("ModelA.col1"), "=", sequelize.col("ModelB.col1")),
+      //     // col2: sequelize.where(sequelize.col("ModelA.col2"), "=", sequelize.col("ModelB.col2"))
+      // },
+      }]
     })
       .then(async (data) => {
-          let excelData = [
-            constants.HEADER_ROW,
-          ];
-          data.rows.map( v => {
-            excelData.push(serializer.mappingExcelRowTransaction(v))
-          })
-          let fileName = `${moment().valueOf()}.xlsx`
-        await commonUtils.makeExcelFile({rows: data.rows, fileName, transactionType: requestData.type});
+        //   let excelData = [
+        //     constants.HEADER_ROW,
+        //   ];
+        //   data.rows.map( v => {
+        //     excelData.push(serializer.mappingExcelRowTransaction(v))
+        //   })
+        //   let fileName = `${moment().valueOf()}.xlsx`
+        // await commonUtils.makeExcelFile({rows: data.rows, fileName, transactionType: requestData.type});
         // let binarybuffer = new Buffer(buffer, 'binary');
         // res.attachment(`${moment().valueOf()}.xlsx`); 
-        return wrapper.response(res, 'success', {fileName}, "Success", SUCCESS.OK)
+        return wrapper.response(res, 'success', data, "Success", SUCCESS.OK)
       })
       .catch(err => {
           console.log(err)

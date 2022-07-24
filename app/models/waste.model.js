@@ -1,10 +1,11 @@
+const models = require('./index');
 module.exports = (sequelize, Sequelize) => {
     const Waste = sequelize.define("waste", {
         id: {
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
         jenisSampah: {
             field: 'jenis_sampah',
@@ -23,6 +24,6 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
     });
-    
+
     return Waste;
 };

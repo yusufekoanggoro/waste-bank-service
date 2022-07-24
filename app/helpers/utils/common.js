@@ -24,7 +24,7 @@ const makeExcelFile = (params) => {
            size: 10,
         }
      });
-    
+    console.log(params[0])
     let lengthArr = params.rows.map(v => v.transactionId.length)
     let maxWidth = Math.max(...lengthArr)
     ws.column(1).setWidth(maxWidth)

@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Transaction = sequelize.define("transaction", {
+    const Report = sequelize.define("report", {
         id: {
             type: Sequelize.INTEGER,
             allowNull: false,
@@ -12,11 +12,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         wasteId: {
             field: 'waste_id',
-            type: Sequelize.INTEGER,
-            references: {
-                model: 'wastes',
-                key: 'id',
-            }
+            type: Sequelize.INTEGER
         },
         total: {
             type: Sequelize.INTEGER
@@ -27,5 +23,5 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     
-    return Transaction;
+    return Report;
 };

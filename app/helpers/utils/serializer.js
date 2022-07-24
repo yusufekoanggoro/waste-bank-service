@@ -1,7 +1,7 @@
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 const mappingExcelRowTransaction = (params) => {
-    const {transactionId, jenisSampah, berat, harga, total, createdAt} = params;
+    const {transactionId, jenisSampah, berat, harga, satuan, total, createdAt} = params;
 
     const result = [
         {
@@ -13,12 +13,12 @@ const mappingExcelRowTransaction = (params) => {
             value: jenisSampah
         },
         {
-            type: Number,
-            value: berat
+            type: String,
+            value: `${berat}${satuan}`
         },
         {
-            type: Number,
-            value: harga
+            type: String,
+            value: `${harga}/${satuan}`
         },
         {
             type: Number,
@@ -34,6 +34,32 @@ const mappingExcelRowTransaction = (params) => {
     return result;
 }
 
+const mappingDataForPDF = (params) => {
+    const createdAt = moment().tz('Asia/Jakarta');
+    const result = {
+        header: {
+            logo: "LOGO",
+            nameApp: "Bank Sampah",
+            corporateName: "PT. Wiwin Mutiara",
+            contact: "Telp : 0234-xxxx"
+        },
+        createdAt: createdAt.format('DD/MM/YYYY HH:mm'),
+        transactionId: params.transactionId,
+        datas: params.datas.map( v => ({
+            jenisSampah: v.jenisSampah,
+            berat: `${v.berat}${v.satuan}`,
+            harga: `${v.harga}/${v.satuan}`,
+            rincian: v.total,
+        })),
+        tunai: params.tunai,
+    }
+
+    result.total = result.datas.reduce((partialSum, a) => partialSum + a.rincian, 0);
+    result.kembalian = (result.tunai - result.total);
+    return result;
+}
+
 module.exports = {
-    mappingExcelRowTransaction
+    mappingExcelRowTransaction,
+    mappingDataForPDF
 }
