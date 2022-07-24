@@ -17,7 +17,6 @@ var mime = require('mime');
 var fs = require('fs');
 
 exports.create = async (req, res) => {
-  req.body.transactionId = uuid()
   const validatePayload = validator.isValidPayload(req.body, joiSchema.transactionCreate);
   if (validatePayload.err) {
     return wrapper.response(res, 'fail', validatePayload, validatePayload.err, ERROR.BAD_REQUEST)
