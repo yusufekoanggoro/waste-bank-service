@@ -4,7 +4,8 @@ const moment = require('moment')
 
 const makeExcelFile = (params) => {
     let wb = new xl.Workbook();
-    let ws = wb.addWorksheet('Transaksi Masuk');
+    const transactionType = params.transactionType === 'in' ? 'Transaksi Masuk' : 'Transaksi Keluar';
+    let ws = wb.addWorksheet(transactionType);
 
     const styleHeading = wb.createStyle({
         font: {

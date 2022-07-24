@@ -69,6 +69,7 @@ const transactionExports = joi.object({
     then: joiExtend.date().format('DD/MM/YYYY').min(joi.ref('startDate')).required(),
   }).optional(),
   sort: joi.string().default("").optional(),
+  jenis: joi.string().valid('in','out').required()
 });
 
 const transactionDownloadFile = joi.object({

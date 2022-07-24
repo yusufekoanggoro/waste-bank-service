@@ -25,8 +25,20 @@ exports.create = async (req, res) => {
   const requestData = validatePayload.data;
 
   Transactions.create(requestData)
-    .then(data => {
-      return wrapper.response(res, 'success', data, "Success", SUCCESS.CREATED)
+    .then(async data => {
+      let excelData = [
+        constants.HEADER_ROW,
+      ];
+      const dataArray = []
+      dataArray.push(data.get({plain:true}));
+      dataArray.map( v => {
+        excelData.push(serializer.mappingExcelRowTransaction(v))
+      })
+      const fileName = `${moment().valueOf()}.xlsx`
+      await commonUtils.makeExcelFile({rows: dataArray, fileName, transactionType: requestData.type});
+      // let binarybuffer = new Buffer(buffer, 'binary');
+      // res.attachment(`${moment().valueOf()}.xlsx`); 
+      return wrapper.response(res, 'success', {fileName}, "Success", SUCCESS.CREATED)
     })
     .catch(err => {
       return wrapper.response(res, 'fail', err, "Failed", ERROR.INTERNAL_ERROR)
@@ -154,7 +166,7 @@ exports.exportsData = async (req, res) => {
             excelData.push(serializer.mappingExcelRowTransaction(v))
           })
           let fileName = `${moment().valueOf()}.xlsx`
-        await commonUtils.makeExcelFile({rows: data.rows, fileName});
+        await commonUtils.makeExcelFile({rows: data.rows, fileName, transactionType: requestData.type});
         // let binarybuffer = new Buffer(buffer, 'binary');
         // res.attachment(`${moment().valueOf()}.xlsx`); 
         return wrapper.response(res, 'success', {fileName}, "Success", SUCCESS.OK)
