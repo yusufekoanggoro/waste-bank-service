@@ -9,7 +9,7 @@ const mappingExcelRowTransaction = (params) => {
         trns.wastes.map( wst => {
             result.push({
                 transactionId: trns.transactionId,
-                jenisSampah: wst.jenisSampah,
+                sampah: wst.jenisSampah,
                 berat: wst.transaction_waste.berat,
                 harga: (wst.transaction_waste.berat * wst.harga),
                 createdAt: trns.createdAt,

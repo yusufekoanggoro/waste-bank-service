@@ -29,7 +29,7 @@ const makeExcelFile = (params) => {
     let lengthArr = params.rows.map(v => v.transactionId.length)
     let maxWidth = Math.max(...lengthArr)
     ws.column(1).setWidth(maxWidth)
-    lengthArr = params.rows.map(v => v.jenisSampah.length)
+    lengthArr = params.rows.map(v => v.sampah.length)
     maxWidth = Math.max(...lengthArr)
     ws.column(2).setWidth(25)
 
@@ -80,29 +80,14 @@ const makeExcelFile = (params) => {
             ws.cell(startRow + i, 1)
             .string('')
             .style(style);
-
-            ws.cell(startRow + i, 2)
-            .string(params.rows[i].jenisSampah)
-            .style(style);
-            ws.cell(startRow + i, 3)
-            .number(params.rows[i].berat)
-            .style(style);
-            ws.cell(startRow + i, 4)
-            .number(params.rows[i].hargaSatuan)
-            .style(style);
-            ws.cell(startRow + i, 5)
-            .number(params.rows[i].harga)
-            .style(style);
-            ws.cell(startRow + i, 6)
-            .date(moment(params.rows[i].createdAt).format())
-            .style(style);
         }else{
             ws.cell(startRow + i, 1)
             .string(params.rows[i].transactionId)
             .style(style);
+        }
 
-            ws.cell(startRow + i, 2)
-            .string(params.rows[i].jenisSampah)
+        ws.cell(startRow + i, 2)
+            .string(params.rows[i].sampah)
             .style(style);
             ws.cell(startRow + i, 3)
             .number(params.rows[i].berat)
@@ -116,13 +101,7 @@ const makeExcelFile = (params) => {
             ws.cell(startRow + i, 6)
             .date(moment(params.rows[i].createdAt).format())
             .style(style);
-        }
 
-        
-
-        ws.cell(startRow + i)
-        .string("asd")
-        .style(style);
 
         transactionIdBeforeIteration = params.rows[i].transactionId;
      }
