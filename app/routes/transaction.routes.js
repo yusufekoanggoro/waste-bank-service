@@ -10,7 +10,7 @@ module.exports = app => {
     router.put("/:id", jwtAuth.verifyToken, transactions.update);
     // router.put("/:id", jwtAuth.verifyToken, uploadMiddleware.single('gambar'), wastes.update);
     router.get("/", jwtAuth.verifyToken, transactions.findAll);
-    router.get("/exports", jwtAuth.verifyToken, transactions.exportsData);
+    router.get("/exports", jwtAuth.verifyToken, transactions.exportData);
     router.get('/downloads/:fileName', transactions.download);
   
     app.use('/api/transactions', router);

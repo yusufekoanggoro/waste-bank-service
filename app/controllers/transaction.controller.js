@@ -18,6 +18,7 @@ var fs = require('fs');
 const pdf = require('html-pdf');
 const ejs = require('ejs');
 const Wastes = db.wastes;
+const TransactionsWaste = db.transactionWaste;
 
 exports.create = async (req, res) => {
   const validatePayload = validator.isValidPayload(req.body, joiSchema.transactionCreate);
@@ -26,39 +27,54 @@ exports.create = async (req, res) => {
   }
   const requestData = validatePayload.data;
 
-  const transactions = requestData.datas.map( v => ({
-    transactionId: v.transactionId,
-    wasteId: v.wasteId,
-    total: v.total,
-    jenis: v.type
-  }));
+  const transaction = {
+    transactionId: requestData.transactionId,
+    jenis: requestData.type,
+    tunai: requestData.tunai
+  };
 
-  Transactions.bulkCreate(transactions)
+  Transactions.create(transaction)
     .then(async data => {
-      const pdfData = serializer.mappingDataForPDF(requestData);
-
-      const templateEJS = 'report.ejs';
-      const fileName = `${moment().valueOf()}.pdf`
-      await ejs.renderFile(path.join(__dirname, '../../files', templateEJS), { transaction: pdfData}, async (err, data) => {
-        if (err) {
-          res.send(err);
-        } else {
-          const options = {
-            width: '350px',
-          };
-
-          await pdf.create(data, options).toFile(`./public/reports/${fileName}`, async (err, res) => {
-              if (err) return console.log(err);
-              // console.log(res); // { filename: '/app/businesscard.pdf' }
-          });
-          // pdf.create(data, options).toStream((err, stream) => {
-          //   stream.pipe(res);
-          // });
-        }
-        
-      });
-
-      return wrapper.response(res, 'success', {fileName : `/reports/${fileName}`}, "Success", SUCCESS.CREATED)
+      const transactionWaste = requestData.datas.map( v => ({
+        transactionId: data.id,
+        wasteId: v.wasteId,
+        berat: v.berat
+      }))
+      console.log(transactionWaste)
+      TransactionsWaste.bulkCreate(transactionWaste)
+        .then( async result => {
+          Transactions.findOne({
+            where: { id: data.id},
+            include: [
+              {
+                model: Wastes,
+                as: "wastes"
+              }
+            ]
+          }).then( async result => {
+            const pdfData = serializer.mappingDataForPDF(result);
+            const templateEJS = 'report.ejs';
+            const fileName = `${moment().valueOf()}.pdf`;
+            await ejs.renderFile(path.join(__dirname, '../../files', templateEJS), { transaction: pdfData}, async (err, data) => {
+              if (err) {
+                res.send(err);
+              } else {
+                const options = {
+                  width: '350px',
+                };
+      
+                await pdf.create(data, options).toFile(`./public/reports/${fileName}`, async (err, res) => {
+                    if (err) return console.log(err);
+                    // console.log(res); // { filename: '/app/businesscard.pdf' }
+                });
+                // pdf.create(data, options).toStream((err, stream) => {
+                //   stream.pipe(res);
+                // });
+              }
+            });
+            return wrapper.response(res, 'success', {fileName : `/reports/${fileName}`}, "Success", SUCCESS.CREATED)
+          })
+        })
     })
     .catch(err => {
       console.log(err)
@@ -142,23 +158,34 @@ exports.findAll = async (req, res) => {
   
   let sortData = requestData.sort.split(':')
   Transactions.findAndCountAll({
-    // where: { id: waste.id }
+    where: { 
+      createdAt: {
+          [Op.gte]: moment(requestData.startDate).toDate(),
+          [Op.gte]: moment(requestData.endDate).toDate()
+      }
+    },
     order: [
       (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
     ],
     limit: requestData.size,
     offset: (requestData.page-1),
+    include: [ { 
+      model: Wastes, 
+      as: "wastes"
+    }],
+    distinct: true
   })
     .then(data => {
-      let pagingData = paging(req.query.page, req.query.size, data.count)
-      return wrapper.paginationResponse(res, 'success', data.rows, "Success", SUCCESS.OK, pagingData)
+      let pagingData = paging(req.query.page, req.query.size, data.count);
+      const transactionWastes = serializer.mappingGetTransactionByDate(data.rows);
+      return wrapper.paginationResponse(res, 'success', transactionWastes.transactionDetail, "Success", SUCCESS.OK, pagingData)
     })
     .catch(err => {
       return wrapper.response(res, 'fail', err, "Failed", ERROR.INTERNAL_ERROR)
     });
 }
 
-exports.exportsData = async (req, res) => {
+exports.exportData = async (req, res) => {
     let { query } = req;
     const validatePayload = validator.isValidPayload(query, joiSchema.transactionExports);
     if (validatePayload.err) {
@@ -168,37 +195,38 @@ exports.exportsData = async (req, res) => {
 
     let sortData = requestData.sort.split(':')
     Transactions.findAndCountAll({
-      // where: { 
-      //   createdAt: {
-      //       [Op.gte]: requestData.startDate,
-      //       [Op.lt]: requestData.endDate,
-      //   }
-      // },
+      where: { 
+        createdAt: {
+            // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
+            [Op.gte]: moment(requestData.startDate).toDate(),
+            [Op.gte]: moment(requestData.endDate).toDate()
+        }
+      },
       order: [
         (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
       ],
-      raw: true,
       include: [ { 
         model: Wastes, 
-
-      //   on: {
-      //     col1: sequelize.where(sequelize.col("ModelA.col1"), "=", sequelize.col("ModelB.col1")),
-      //     // col2: sequelize.where(sequelize.col("ModelA.col2"), "=", sequelize.col("ModelB.col2"))
-      // },
-      }]
+        as: "wastes"
+      }],
+      distinct: true
     })
       .then(async (data) => {
-        //   let excelData = [
-        //     constants.HEADER_ROW,
-        //   ];
-        //   data.rows.map( v => {
-        //     excelData.push(serializer.mappingExcelRowTransaction(v))
-        //   })
-        //   let fileName = `${moment().valueOf()}.xlsx`
-        // await commonUtils.makeExcelFile({rows: data.rows, fileName, transactionType: requestData.type});
+          // let excelData = [
+          //   constants.HEADER_ROW,
+          // ];
+          const excelData = serializer.mappingExcelRowTransaction(data.rows)
+          // excelData.push(...a)
+          // data.rows.map( v => {
+          //   excelData.push(serializer.mappingExcelRowTransaction(v))
+          // })
+          // const transactionWastes = serializer.mappingGetTransactionByDate(data.rows);
+          // let pagingData = paging(req.query.page, req.query.size, data.count)
+          let fileName = `${moment().valueOf()}.xlsx`
+        await commonUtils.makeExcelFile({rows: excelData, transactionType: requestData.type, fileName});
         // let binarybuffer = new Buffer(buffer, 'binary');
         // res.attachment(`${moment().valueOf()}.xlsx`); 
-        return wrapper.response(res, 'success', data, "Success", SUCCESS.OK)
+        return wrapper.response(res, 'success', excelData, "Success", SUCCESS.OK)
       })
       .catch(err => {
           console.log(err)

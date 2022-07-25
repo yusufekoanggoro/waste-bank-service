@@ -38,12 +38,7 @@ const transactionCreate = joi.object({
   transactionId: joi.string().required(),
   datas: joi.array().items({
     wasteId: joi.number().required(),
-    jenisSampah: joi.string().required(),
-    satuan: joi.string().required(),
-    harga: joi.number().required(),
-    deskripsi: joi.string().required().allow(''),
     berat: joi.number().required(),
-    total: joi.number().required(),
   }),
   type: joi.string().valid('in','out').required(),
   tunai: joi.number().required(),
@@ -66,6 +61,12 @@ const transactionFindAll = joi.object({
   page: joi.number().required(),
   size: joi.number().required(),
   sort: joi.string().default("").optional(),
+  startDate: joiExtend.date().format('DD/MM/YYYY').optional(),
+  endDate: joiExtend.date().format('DD/MM/YYYY').when('startDate', {
+    is: joiExtend.date().format('DD/MM/YYYY').optional(),
+    then: joiExtend.date().format('DD/MM/YYYY').min(joi.ref('startDate')).required(),
+  }).optional(),
+  type: joi.string().valid('in','out').required()
 });
 
 const transactionExports = joi.object({
@@ -75,7 +76,7 @@ const transactionExports = joi.object({
     then: joiExtend.date().format('DD/MM/YYYY').min(joi.ref('startDate')).required(),
   }).optional(),
   sort: joi.string().default("").optional(),
-  jenis: joi.string().valid('in','out').required()
+  type: joi.string().valid('in','out').required()
 });
 
 const transactionDownloadFile = joi.object({

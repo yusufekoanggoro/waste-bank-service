@@ -3,6 +3,7 @@ const path = require('path');
 const moment = require('moment')
 
 const makeExcelFile = (params) => {
+    // console.log(params)
     let wb = new xl.Workbook();
     const transactionType = params.transactionType === 'in' ? 'Transaksi Masuk' : 'Transaksi Keluar';
     let ws = wb.addWorksheet(transactionType);
@@ -24,7 +25,7 @@ const makeExcelFile = (params) => {
            size: 10,
         }
      });
-    console.log(params[0])
+
     let lengthArr = params.rows.map(v => v.transactionId.length)
     let maxWidth = Math.max(...lengthArr)
     ws.column(1).setWidth(maxWidth)
@@ -36,11 +37,11 @@ const makeExcelFile = (params) => {
     maxWidth = Math.max(...lengthArr)
     ws.column(3).setWidth(10)
 
-    lengthArr = params.rows.map(v => v.harga.length)
+    lengthArr = params.rows.map(v => v.hargaSatuan.length)
     maxWidth = Math.max(...lengthArr)
     ws.column(4).setWidth(20)
 
-    lengthArr = params.rows.map(v => v.total.length)
+    lengthArr = params.rows.map(v => v.harga.length)
     maxWidth = Math.max(...lengthArr)
     ws.column(5).setWidth(20)
 
@@ -61,11 +62,11 @@ const makeExcelFile = (params) => {
     .style(styleHeading);
 
     ws.cell(1, 4)
-    .string('Harga')
+    .string('Harga Satuan')
     .style(styleHeading);
 
     ws.cell(1, 5)
-    .string('total')
+    .string('Harga')
     .style(styleHeading);
 
     ws.cell(1, 6)
@@ -73,31 +74,63 @@ const makeExcelFile = (params) => {
     .style(styleHeading);
 
      let startRow = 2;
+     let transactionIdBeforeIteration;
      for (let i = 0; i < params.rows.length; i++) {
-        ws.cell(startRow + i, 1)
-        .string(params.rows[i].transactionId)
+        if(transactionIdBeforeIteration === params.rows[i].transactionId){
+            ws.cell(startRow + i, 1)
+            .string('')
+            .style(style);
+
+            ws.cell(startRow + i, 2)
+            .string(params.rows[i].jenisSampah)
+            .style(style);
+            ws.cell(startRow + i, 3)
+            .number(params.rows[i].berat)
+            .style(style);
+            ws.cell(startRow + i, 4)
+            .number(params.rows[i].hargaSatuan)
+            .style(style);
+            ws.cell(startRow + i, 5)
+            .number(params.rows[i].harga)
+            .style(style);
+            ws.cell(startRow + i, 6)
+            .date(moment(params.rows[i].createdAt).format())
+            .style(style);
+        }else{
+            ws.cell(startRow + i, 1)
+            .string(params.rows[i].transactionId)
+            .style(style);
+
+            ws.cell(startRow + i, 2)
+            .string(params.rows[i].jenisSampah)
+            .style(style);
+            ws.cell(startRow + i, 3)
+            .number(params.rows[i].berat)
+            .style(style);
+            ws.cell(startRow + i, 4)
+            .number(params.rows[i].hargaSatuan)
+            .style(style);
+            ws.cell(startRow + i, 5)
+            .number(params.rows[i].harga)
+            .style(style);
+            ws.cell(startRow + i, 6)
+            .date(moment(params.rows[i].createdAt).format())
+            .style(style);
+        }
+
+        
+
+        ws.cell(startRow + i)
+        .string("asd")
         .style(style);
-        ws.cell(startRow + i, 2)
-        .string(params.rows[i].jenisSampah)
-        .style(style);
-        ws.cell(startRow + i, 3)
-        .number(params.rows[i].berat)
-        .style(style);
-        ws.cell(startRow + i, 4)
-        .number(params.rows[i].harga)
-        .style(style);
-        ws.cell(startRow + i, 5)
-        .number(params.rows[i].total)
-        .style(style);
-        ws.cell(startRow + i, 6)
-        .date(moment(params.rows[i].createdAt).add(7, 'hours').format())
-        .style(style);
+
+        transactionIdBeforeIteration = params.rows[i].transactionId;
      }
     // const buffer = wb.writeToBuffer().then((buffer) => {
     //     return buffer;
     // });
     // return buffer;
-    wb.write(`${path.join(__dirname, `../../../public/uploads/${params.fileName}`)}`);
+    wb.write(`${path.join(__dirname, `../../../public/reports/${params.fileName}`)}`);
 }
 
 module.exports = {

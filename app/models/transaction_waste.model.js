@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    const Transaction = sequelize.define("transaction", {
+    const TransactionWaste = sequelize.define("transaction_waste", {
         id: {
             type: Sequelize.INTEGER,
             allowNull: false,
@@ -10,15 +10,15 @@ module.exports = (sequelize, Sequelize) => {
             field: 'transaction_id',
             type: Sequelize.STRING
         },
-        tunai: {
-            field: 'tunai',
+        wasteId: {
+            field: 'waste_id',
             type: Sequelize.INTEGER
         },
-        jenis: {
-            type: Sequelize.ENUM,
-            values: ['in', 'out']
-        }
+        berat: {
+            field: 'berat',
+            type: Sequelize.INTEGER
+        },
     });
     
-    return Transaction;
+    return TransactionWaste;
 };

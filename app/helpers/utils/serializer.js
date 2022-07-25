@@ -1,41 +1,27 @@
 const moment = require('moment-timezone');
+const convertRupiah = require('rupiah-format')
 
 const mappingExcelRowTransaction = (params) => {
-    const {transactionId, jenisSampah, berat, harga, satuan, total, createdAt} = params;
+    // const {transactionId, wastes, createdAt} = params;
+    const result = []
 
-    const result = [
-        {
-            type: String,
-            value: transactionId
-        },
-        {
-            type: String,
-            value: jenisSampah
-        },
-        {
-            type: String,
-            value: `${berat}${satuan}`
-        },
-        {
-            type: String,
-            value: `${harga}/${satuan}`
-        },
-        {
-            type: Number,
-            value: total
-        },
-        {
-            type: Date,
-            // value: moment(createdAt).add(7, 'hours').format(),
-            value: new Date(createdAt),
-            format: 'dd/mm/yyyy'
-        }
-    ]
+    params.map( trns => {
+        trns.wastes.map( wst => {
+            result.push({
+                transactionId: trns.transactionId,
+                jenisSampah: wst.jenisSampah,
+                berat: wst.transaction_waste.berat,
+                harga: (wst.transaction_waste.berat * wst.harga),
+                createdAt: trns.createdAt,
+                hargaSatuan:  wst.harga
+            })
+        })
+    })
     return result;
 }
 
 const mappingDataForPDF = (params) => {
-    const createdAt = moment().tz('Asia/Jakarta');
+    const createdAt = moment(params.createdAt).tz('Asia/Jakarta');
     const result = {
         header: {
             logo: "LOGO",
@@ -45,11 +31,11 @@ const mappingDataForPDF = (params) => {
         },
         createdAt: createdAt.format('DD/MM/YYYY HH:mm'),
         transactionId: params.transactionId,
-        datas: params.datas.map( v => ({
+        datas: params.wastes.map( v => ({
             jenisSampah: v.jenisSampah,
-            berat: `${v.berat}${v.satuan}`,
+            berat: `${v.transaction_waste.berat}${v.satuan}`,
             harga: `${v.harga}/${v.satuan}`,
-            rincian: v.total,
+            rincian: (v.transaction_waste.berat * v.harga),
         })),
         tunai: params.tunai,
     }
@@ -59,7 +45,24 @@ const mappingDataForPDF = (params) => {
     return result;
 }
 
+const mappingGetTransactionByDate = (params) => {
+    const result = {transactionDetail: [], total: 0}
+    params.map( v => {
+        result.transactionDetail.push({
+            transactionId: v.transactionId,
+            createdAt: moment(v.createdAt).format('DD/MM/YYYY'),
+            jumlahSampah: v.wastes.length,
+            rincian: v.wastes.map( vv => ({
+                rincian: (vv.transaction_waste.berat * vv.harga),
+            })).reduce((partialSum, a) => partialSum + a.rincian, 0)
+        })
+    })
+    result.total = result.transactionDetail.reduce((partialSum, a) => partialSum + a.rincian, 0);
+    return result;
+}
+
 module.exports = {
     mappingExcelRowTransaction,
-    mappingDataForPDF
+    mappingDataForPDF,
+    mappingGetTransactionByDate
 }
