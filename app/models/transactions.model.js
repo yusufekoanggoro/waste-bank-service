@@ -14,7 +14,8 @@ module.exports = (sequelize, Sequelize) => {
             field: 'tunai',
             type: Sequelize.INTEGER
         },
-        jenis: {
+        type: {
+            field: 'jenis',
             type: Sequelize.ENUM,
             values: ['in', 'out']
         }

@@ -164,7 +164,8 @@ exports.findAll = async (req, res) => {
       createdAt: {
           [Op.gte]: moment(requestData.startDate).toDate(),
           [Op.gte]: moment(requestData.endDate).toDate()
-      }
+      },
+      type: requestData.type
     },
     order: [
       (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
@@ -202,7 +203,8 @@ exports.exportData = async (req, res) => {
             // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
             [Op.gte]: moment(requestData.startDate).toDate(),
             [Op.gte]: moment(requestData.endDate).toDate()
-        }
+        },
+        type: requestData.type
       },
       order: [
         (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
@@ -214,21 +216,13 @@ exports.exportData = async (req, res) => {
       distinct: true
     })
       .then(async (data) => {
-          // let excelData = [
-          //   constants.HEADER_ROW,
-          // ];
-          const excelData = serializer.mappingExcelRowTransaction(data.rows)
-          // excelData.push(...a)
-          // data.rows.map( v => {
-          //   excelData.push(serializer.mappingExcelRowTransaction(v))
-          // })
-          // const transactionWastes = serializer.mappingGetTransactionByDate(data.rows);
-          // let pagingData = paging(req.query.page, req.query.size, data.count)
-          let fileName = `${moment().valueOf()}.xlsx`
-        await commonUtils.makeExcelFile({rows: excelData, transactionType: requestData.type, fileName});
-        // let binarybuffer = new Buffer(buffer, 'binary');
-        // res.attachment(`${moment().valueOf()}.xlsx`); 
-        return wrapper.response(res, 'success', excelData, "Success", SUCCESS.OK)
+          if(data.rows.length > 0){
+            const excelData = serializer.mappingExcelRowTransaction(data.rows)
+            let fileName = `${moment().valueOf()}.xlsx`
+            await commonUtils.makeExcelFile({rows: excelData, transactionType: requestData.type, fileName});
+            return wrapper.response(res, 'success', {fileName: `reports/${fileName}`}, "Success", SUCCESS.OK)
+          }
+          return wrapper.response(res, 'success', [], "Data Not Found", ERROR.NOT_FOUND)
       })
       .catch(err => {
           console.log(err)
@@ -264,7 +258,8 @@ exports.createReport = async (req, res) => {
             // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
             [Op.gte]: moment(requestData.startDate).toDate(),
             [Op.gte]: moment(requestData.endDate).toDate()
-        }
+        },
+        jenis: requestData.type
       },
       order: [
         (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
