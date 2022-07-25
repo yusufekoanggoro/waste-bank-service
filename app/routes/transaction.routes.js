@@ -12,6 +12,7 @@ module.exports = app => {
     router.get("/", jwtAuth.verifyToken, transactions.findAll);
     router.get("/exports", jwtAuth.verifyToken, transactions.exportData);
     router.get('/downloads/:fileName', transactions.download);
-  
+    router.get("/reports", jwtAuth.verifyToken, transactions.createReport);
+
     app.use('/api/transactions', router);
 };

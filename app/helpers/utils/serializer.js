@@ -1,5 +1,6 @@
 const moment = require('moment-timezone');
-const convertRupiah = require('rupiah-format')
+const convertRupiah = require('rupiah-format');
+const { data } = require('./wrapper');
 
 const mappingExcelRowTransaction = (params) => {
     // const {transactionId, wastes, createdAt} = params;
@@ -61,8 +62,27 @@ const mappingGetTransactionByDate = (params) => {
     return result;
 }
 
+const reportCreateBulk = (params) => {
+    const datas = [];
+    params.map( v => {
+        v.wastes.map( vv => {
+            datas.push({
+                transactionId: v.transactionId,
+                wasteName: vv.jenisSampah,
+                berat: vv.berat,
+                hargaSatuan: vv.harga,
+                berat: vv.transaction_waste.berat,
+                harga: (vv.transaction_waste.berat * vv.harga),
+                jenis: v.jenis
+            })
+        })
+    });
+    return datas;
+}
+
 module.exports = {
     mappingExcelRowTransaction,
     mappingDataForPDF,
-    mappingGetTransactionByDate
+    mappingGetTransactionByDate,
+    reportCreateBulk
 }

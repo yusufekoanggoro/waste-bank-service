@@ -19,6 +19,8 @@ const pdf = require('html-pdf');
 const ejs = require('ejs');
 const Wastes = db.wastes;
 const TransactionsWaste = db.transactionWaste;
+const Reports = db.reports;
+
 
 exports.create = async (req, res) => {
   const validatePayload = validator.isValidPayload(req.body, joiSchema.transactionCreate);
@@ -245,4 +247,43 @@ exports.download = async (req, res) => {
     const file = path.join(__dirname, `../../public/uploads/${requestData.fileName}`);
 
     res.download(file);
+}
+
+exports.createReport = async (req, res) => {
+  let { query } = req;
+    const validatePayload = validator.isValidPayload(query, joiSchema.createReport);
+    if (validatePayload.err) {
+      return wrapper.response(res, 'fail', validatePayload, validatePayload.err, ERROR.BAD_REQUEST)
+    }
+    const requestData = validatePayload.data;
+
+    let sortData = requestData.sort.split(':')
+    Transactions.findAndCountAll({
+      where: { 
+        createdAt: {
+            // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
+            [Op.gte]: moment(requestData.startDate).toDate(),
+            [Op.gte]: moment(requestData.endDate).toDate()
+        }
+      },
+      order: [
+        (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
+      ],
+      include: [ { 
+        model: Wastes, 
+        as: "wastes"
+      }],
+      distinct: true
+    })
+      .then(async (data) => {
+        const reports = serializer.reportCreateBulk(data.rows);
+        Reports.bulkCreate(reports)
+        .then( result => {
+          return wrapper.response(res, 'success', result, "Success", SUCCESS.OK)
+        })
+      })
+      .catch(err => {
+          console.log(err)
+        return wrapper.response(res, 'fail', err, "Failed", ERROR.INTERNAL_ERROR)
+      });
 }

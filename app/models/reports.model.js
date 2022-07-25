@@ -10,11 +10,20 @@ module.exports = (sequelize, Sequelize) => {
             field: 'transaction_id',
             type: Sequelize.STRING
         },
-        wasteId: {
-            field: 'waste_id',
+        wasteName: {
+            field: 'nama_sampah',
+            type: Sequelize.STRING
+        },
+        berat: {
+            field: 'berat',
             type: Sequelize.INTEGER
         },
-        total: {
+        hargaSatuan: {
+            field: 'harga_satuan',
+            type: Sequelize.INTEGER
+        },
+        harga: {
+            field: 'harga',
             type: Sequelize.INTEGER
         },
         jenis: {

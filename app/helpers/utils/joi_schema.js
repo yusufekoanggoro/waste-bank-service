@@ -83,6 +83,16 @@ const transactionDownloadFile = joi.object({
   fileName: joi.string().required(),
 });
 
+const createReport = joi.object({
+  startDate: joiExtend.date().format('DD/MM/YYYY').optional(),
+  endDate: joiExtend.date().format('DD/MM/YYYY').when('startDate', {
+    is: joiExtend.date().format('DD/MM/YYYY').optional(),
+    then: joiExtend.date().format('DD/MM/YYYY').min(joi.ref('startDate')).required(),
+  }).optional(),
+  sort: joi.string().default("").optional(),
+  type: joi.string().valid('in','out').required()
+});
+
 module.exports = {
     wasteCreate,
     userSignIn,
@@ -94,5 +104,6 @@ module.exports = {
     transactionUpdate,
     transactionFindAll,
     transactionExports,
-    transactionDownloadFile
+    transactionDownloadFile,
+    createReport
 }

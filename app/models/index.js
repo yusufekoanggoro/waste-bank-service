@@ -24,6 +24,7 @@ db.wastes = require("./waste.model")(sequelize, Sequelize);
 db.users = require("./user.model")(sequelize, Sequelize);
 db.transactions = require("./transactions.model")(sequelize, Sequelize);
 db.transactionWaste = require("./transaction_waste.model")(sequelize, Sequelize);
+db.reports = require("./reports.model")(sequelize, Sequelize);
 
 
 db.transactions.belongsToMany(db.wastes, {
