@@ -69,7 +69,7 @@ exports.create = async (req, res) => {
                     if (err) return console.log(err);
                     // console.log(res); // { filename: '/app/businesscard.pdf' }
                 });
-                // pdf.create(data, options).toStream((err, stream) => {
+                // return pdf.create(data, options).toStream((err, stream) => {
                 //   stream.pipe(res);
                 // });
               }
@@ -218,9 +218,10 @@ exports.exportData = async (req, res) => {
       .then(async (data) => {
           if(data.rows.length > 0){
             const excelData = serializer.mappingExcelRowTransaction(data.rows)
-            let fileName = `${moment().valueOf()}.xlsx`
+            let fileName = `${moment().valueOf()}.xlsx`;
+            await this.createReport(req, res);
             await commonUtils.makeExcelFile({rows: excelData, transactionType: requestData.type, fileName});
-            return wrapper.response(res, 'success', {fileName: `reports/${fileName}`}, "Success", SUCCESS.OK)
+            return wrapper.response(res, 'success', {fileName: `/reports/${fileName}`}, "Success", SUCCESS.OK)
           }
           return wrapper.response(res, 'success', [], "Data Not Found", ERROR.NOT_FOUND)
       })
@@ -238,7 +239,7 @@ exports.download = async (req, res) => {
     }
     const requestData = validatePayload.data;
 
-    const file = path.join(__dirname, `../../public/uploads/${requestData.fileName}`);
+    const file = path.join(__dirname, `../../public/reports/${requestData.fileName}`);
 
     res.download(file);
 }
@@ -274,11 +275,11 @@ exports.createReport = async (req, res) => {
         const reports = serializer.reportCreateBulk(data.rows);
         Reports.bulkCreate(reports)
         .then( result => {
-          return wrapper.response(res, 'success', result, "Success", SUCCESS.OK)
+          return true
         })
       })
       .catch(err => {
           console.log(err)
-        return wrapper.response(res, 'fail', err, "Failed", ERROR.INTERNAL_ERROR)
+        return false
       });
 }
