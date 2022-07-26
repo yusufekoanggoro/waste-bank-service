@@ -31,7 +31,7 @@ exports.create = async (req, res) => {
 
   const transaction = {
     transactionId: requestData.transactionId,
-    jenis: requestData.type,
+    type: requestData.type,
     tunai: requestData.tunai
   };
 
@@ -42,7 +42,7 @@ exports.create = async (req, res) => {
         wasteId: v.wasteId,
         berat: v.berat
       }))
-      console.log(transactionWaste)
+
       TransactionsWaste.bulkCreate(transactionWaste)
         .then( async result => {
           Transactions.findOne({
