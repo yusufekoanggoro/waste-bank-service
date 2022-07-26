@@ -159,11 +159,12 @@ exports.findAll = async (req, res) => {
   const requestData = validatePayload.data;
   
   let sortData = requestData.sort.split(':')
+
   Transactions.findAndCountAll({
     where: { 
       createdAt: {
           [Op.gte]: moment(requestData.startDate).toDate(),
-          [Op.gte]: moment(requestData.endDate).toDate()
+          [Op.lte]: moment(requestData.endDate).add(1, 'days').toDate()
       },
       type: requestData.type
     },
@@ -202,7 +203,7 @@ exports.exportData = async (req, res) => {
         createdAt: {
             // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
             [Op.gte]: moment(requestData.startDate).toDate(),
-            [Op.gte]: moment(requestData.endDate).toDate()
+            [Op.lte]: moment(requestData.endDate).toDate()
         },
         type: requestData.type
       },
