@@ -32,7 +32,7 @@ exports.authenticate = async (req, res) => {
         if(isValidPassword){
             const dataResponse = {
                 username: result.username,
-                sub: result.username
+                sub: result
             };
             const accessToken = await jwtAuth.generateToken(dataResponse);
             dataResponse.accessToken = accessToken;

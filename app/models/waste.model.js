@@ -12,7 +12,8 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         },
         satuan: {
-            type: Sequelize.STRING
+            type: Sequelize.ENUM,
+            values: ["KG"]
         },
         harga: {
             type: Sequelize.INTEGER

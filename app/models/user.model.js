@@ -12,6 +12,10 @@ module.exports = (sequelize, Sequelize) => {
         password: {
             type: Sequelize.STRING
         },
+        role: {
+            type: Sequelize.ENUM,
+            values: ['admin', 'karyawan']
+        },
         createdAt: {
             field: 'created_at',
             type: Sequelize.DATE,

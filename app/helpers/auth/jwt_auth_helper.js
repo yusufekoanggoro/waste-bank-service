@@ -56,8 +56,8 @@ const verifyToken = async (req, res, next) => {
     }
     return wrapper.response(res, 'fail', result, 'Token is not valid!', ERROR.UNAUTHORIZED);
   }
-
-  const username = decodedToken.sub;
+  
+  const username = decodedToken.sub.username;
   const user = await Users.findOne({
     where: {
       username: username

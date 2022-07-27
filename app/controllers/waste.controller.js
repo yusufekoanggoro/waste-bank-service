@@ -115,7 +115,7 @@ exports.findAll = async (req, res) => {
     return wrapper.response(res, 'fail', validatePayload, validatePayload.err, ERROR.BAD_REQUEST)
   }
   const requestData = validatePayload.data;
-  
+
   let sortData = requestData.sort.split(':')
   Wastes.findAndCountAll({
     // where: { id: waste.id }

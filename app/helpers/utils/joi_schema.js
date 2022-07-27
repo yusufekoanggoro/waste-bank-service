@@ -4,7 +4,7 @@ const joiExtend = joi.extend(joiDateFormat)
 
 const wasteCreate = joi.object({
   jenisSampah: joi.string().required(),
-  satuan: joi.string().required(),
+  satuan: joi.string().valid('KG').required(),
   harga: joi.number().required(),
   gambar: joi.string().required(),
   deskripsi: joi.string().required(),
@@ -12,7 +12,8 @@ const wasteCreate = joi.object({
 
 const userSignIn = joi.object({
     username: joi.string().required(),
-    password: joi.string().required()
+    password: joi.string().required(),
+    role: joi.string().valid('admin','karyawan').optional()
 });
 
 const wasteDelete = joi.object({
