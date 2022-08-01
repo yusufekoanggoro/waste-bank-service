@@ -261,7 +261,7 @@ exports.createReport = async (req, res) => {
             [Op.gte]: moment(requestData.startDate).toDate(),
             [Op.gte]: moment(requestData.endDate).toDate()
         },
-        jenis: requestData.type
+        type: requestData.type
       },
       order: [
         (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
