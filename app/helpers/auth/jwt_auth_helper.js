@@ -48,6 +48,7 @@ const verifyToken = async (req, res, next) => {
     return wrapper.response(res, 'fail', result, 'Invalid token!', ERROR.FORBIDDEN);
   }
   let decodedToken;
+
   try {
     decodedToken = await jwt.verify(token, publicKey, verifyOptions);
   } catch (error) {
@@ -58,11 +59,13 @@ const verifyToken = async (req, res, next) => {
   }
   
   const username = decodedToken.sub.username;
+  if(!username) return wrapper.response(res, 'fail', result, 'Token is not valid!', ERROR.UNAUTHORIZED);
   const user = await Users.findOne({
     where: {
       username: username
     }
   });
+
   if (!user) {
     return wrapper.response(res, 'fail', result, 'Invalid token!', ERROR.FORBIDDEN);
   }

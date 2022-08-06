@@ -24,6 +24,11 @@ module.exports = (sequelize, Sequelize) => {
         deskripsi: {
             type: Sequelize.STRING
         },
+        type: {
+            field: 'jenis',
+            type: Sequelize.ENUM,
+            values: ['in', 'out']
+        }
     });
 
     return Waste;

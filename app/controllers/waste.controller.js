@@ -118,7 +118,7 @@ exports.findAll = async (req, res) => {
 
   let sortData = requestData.sort.split(':')
   Wastes.findAndCountAll({
-    // where: { id: waste.id }
+    where: { type: requestData.type.split(',') },
     order: [
       (requestData.sort !== '') ? [sortData[0], sortData[1].toUpperCase()]  : ['createdAt', 'DESC']
     ],

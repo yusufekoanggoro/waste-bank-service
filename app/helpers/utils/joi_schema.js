@@ -8,6 +8,7 @@ const wasteCreate = joi.object({
   harga: joi.number().required(),
   gambar: joi.string().required(),
   deskripsi: joi.string().required(),
+  type: joi.string().valid('in','out').required()
 });
 
 const userSignIn = joi.object({
@@ -27,12 +28,14 @@ const wasteUpdate = joi.object({
   harga: joi.number().required(),
   gambar: joi.string().default(""),
   deskripsi: joi.string().required(),
+  type: joi.string().valid('in','out').required()
 })
 
 const wasteFindAll = joi.object({
   page: joi.number().required(),
   size: joi.number().required(),
   sort: joi.string().default("").optional(),
+  type: joi.string().valid('in','out').default('in,out').optional(),
 })
 
 const transactionCreate = joi.object({
