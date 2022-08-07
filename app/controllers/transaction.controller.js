@@ -164,7 +164,7 @@ exports.findAll = async (req, res) => {
     where: { 
       createdAt: {
           [Op.gte]: moment(requestData.startDate).toDate(),
-          [Op.lte]: moment(requestData.endDate).add(1, 'days').toDate()
+          [Op.lte]: moment(requestData.endDate).endOf('day').toDate()
       },
       type: requestData.type
     },
@@ -203,7 +203,7 @@ exports.exportData = async (req, res) => {
         createdAt: {
             // [Op.between]: [moment(requestData.startDate).toDate(), moment(requestData.endDate).toDate()]
             [Op.gte]: moment(requestData.startDate).toDate(),
-            [Op.lte]: moment(requestData.endDate).toDate()
+            [Op.lte]: moment(requestData.endDate).endOf('day').toDate()
         },
         type: requestData.type
       },
