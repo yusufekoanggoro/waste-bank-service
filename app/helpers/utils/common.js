@@ -75,6 +75,7 @@ const makeExcelFile = (params) => {
 
      let startRow = 2;
      let transactionIdBeforeIteration;
+     let count = 0;
      for (let i = 0; i < params.rows.length; i++) {
         if(transactionIdBeforeIteration === params.rows[i].transactionId){
             ws.cell(startRow + i, 1)
@@ -101,10 +102,17 @@ const makeExcelFile = (params) => {
             ws.cell(startRow + i, 6)
             .date(moment(params.rows[i].createdAt).format())
             .style(style);
-
+        count += params.rows[i].harga
 
         transactionIdBeforeIteration = params.rows[i].transactionId;
      }
+
+     ws.cell(startRow + params.rows.length + 1, 4)
+            .string('Total')
+            .style(styleHeading);
+    ws.cell(startRow + params.rows.length + 1, 5)
+        .number(count)
+        .style(styleHeading);
     // const buffer = wb.writeToBuffer().then((buffer) => {
     //     return buffer;
     // });
